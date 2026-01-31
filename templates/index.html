@@ -9,19 +9,12 @@
 <body>
 
     <div id="chat-box">
-        <div class="msg">
         </div>
     </div>
 
     <div id="input-area">
-        <input 
-            type="text" 
-            id="user-input" 
-            placeholder="Enter your nonsense here..." 
-            autocomplete="off"
-            onkeypress="if(event.key === 'Enter') sendMessage()"
-        >
-        <button id="send-btn" onclick="sendMessage()">SEND</button>
+        <input type="text" id="user-input" placeholder="Say something..." autocomplete="off">
+        <button id="send-btn">SEND</button>
     </div>
 
     <script>
@@ -32,10 +25,11 @@
         async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
-            appendMessage('you', message);
+
+            appendMessage('user', message);
             userInput.value = '';
+            
             sendBtn.disabled = true;
-            sendBtn.innerText = "...";
             
             try {
                 const response = await fetch('/chat', {
@@ -43,19 +37,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: message })
                 });
-
                 const data = await response.json();
-                if (data.Clanka) {
-                    appendMessage('clanka', data.Clanka);
-                } else {
-                    appendMessage('clanka', "Error: " + data.error);
-                }
+                appendMessage('clanka', data.Clanka || data.error);
             } catch (error) {
-                appendMessage('clanka', "CONNECTION LOST.");
+                appendMessage('clanka', "Connection failed.");
             } finally {
                 sendBtn.disabled = false;
-                sendBtn.innerText = "SEND";
-                chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
 
@@ -66,6 +53,11 @@
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     </script>
 </body>
 </html>
