@@ -10,7 +10,9 @@ body {
     font-family: 'Courier New', monospace; 
     display: flex; 
     flex-direction: column; 
-    height: 100vh; 
+    /* Fix: Use dvh to account for mobile browser toolbars */
+    height: 100vh;
+    height: 100dvh; 
     width: 100vw;
     overflow: hidden; 
 }
@@ -23,6 +25,8 @@ body {
     flex-direction: column;
     gap: 15px;
     background: radial-gradient(circle, #1a1a1a 0%, #0d0d0d 100%);
+    /* Ensure content starts at the top and allows scrolling */
+    min-height: 0; 
 }
 
 #chat-box::-webkit-scrollbar {
@@ -67,6 +71,11 @@ body {
     background: #000;
     border-top: 1px solid #222;
     align-items: center;
+    /* Fix: Prevent the input area from shrinking to 0 height on small screens */
+    flex-shrink: 0; 
+    /* Safety for older mobile browsers */
+    position: relative;
+    z-index: 10;
 }
 
 input { 
@@ -77,7 +86,9 @@ input {
     padding: 12px 15px; 
     outline: none;
     font-family: inherit;
+    /* 16px prevents iOS from auto-zooming and breaking the layout */
     font-size: 16px; 
+    min-width: 0;
 }
 
 input:focus {
@@ -93,6 +104,7 @@ button {
     font-weight: bold; 
     font-family: inherit;
     transition: 0.2s;
+    flex-shrink: 0;
 }
 
 button:hover {
@@ -106,15 +118,21 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* Media Queries */
 @media (max-width: 768px) {
     #chat-box { padding: 15px; }
     .msg { max-width: 95%; }
 }
 
 @media (max-width: 480px) {
-    #input-area { padding: 10px; gap: 5px; }
+    #input-area { 
+        padding: 10px; 
+        gap: 5px; 
+        /* Adds extra padding at bottom for gesture-based phones (iPhone Home Bar) */
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    }
     input { padding: 10px; }
-    button { padding: 10px 15px; font-size: 0.8rem; }
+    button { padding: 10px 12px; font-size: 0.8rem; }
 }
 
 @keyframes scanline {
