@@ -3,66 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clanka</title>
+    <title>CLANKA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+
+    <div id="chat-box">
+        <div class="msg">
+        </div>
+    </div>
+
     <div id="input-area">
         <input 
             type="text" 
             id="user-input" 
-            placeholder="Type something stupid..." 
+            placeholder="Enter your nonsense here..." 
             autocomplete="off"
             onkeypress="if(event.key === 'Enter') sendMessage()"
         >
-        <button onclick="sendMessage()">SEND</button>
+        <button id="send-btn" onclick="sendMessage()">SEND</button>
     </div>
 
     <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
         async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const chatBox = document.getElementById('chat-box');
-            const message = input.value.trim();
+            const message = userInput.value.trim();
             if (!message) return;
-            chatBox.innerHTML += `
-                <div class="msg">
-                    <span class="user">you:</span> ${message}
-                </div>
-            `;
-
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
+            appendMessage('you', message);
+            userInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.innerText = "...";
+            
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: message }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
                 });
 
                 const data = await response.json();
                 if (data.Clanka) {
-                    chatBox.innerHTML += `
-                        <div class="msg">
-                            <span class="clanka">clanka:</span> ${data.Clanka}
-                        </div>
-                    `;
+                    appendMessage('clanka', data.Clanka);
                 } else {
-                    chatBox.innerHTML += `
-                        <div class="msg">
-                            <span class="clanka">clanka:</span> error 404: brain not found. (Actually, it was: ${data.error})
-                        </div>
-                    `;
+                    appendMessage('clanka', "Error: " + data.error);
                 }
             } catch (error) {
-                chatBox.innerHTML += `
-                    <div class="msg">
-                        <span class="clanka">clanka:</span> Check your code dumb one
-                    </div>
-                `;
+                appendMessage('clanka', "CONNECTION LOST.");
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerText = "SEND";
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
+        }
+
+        function appendMessage(sender, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'msg';
+            msgDiv.innerHTML = `<span class="${sender}">${sender.toUpperCase()}:</span> ${text}`;
+            chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>

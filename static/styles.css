@@ -1,28 +1,48 @@
+/* 1. Global Reset & Layout */
+* {
+    box-sizing: border-box;
+}
+
 body { 
     background: #0d0d0d; 
     color: #00ff41; 
     font-family: 'Courier New', monospace; 
     display: flex; 
     flex-direction: column; 
-    height: 100vh; 
+    height: 100vh; /* Takes full height of the browser window */
     margin: 0; 
+    overflow: hidden; /* Prevents the whole page from scrolling */
 }
 
+/* 2. Chat History Area */
 #chat-box { 
-    flex: 1; 
-    overflow-y: auto; 
+    flex: 1; /* This is the magic: it grows to push the input area to the bottom */
+    overflow-y: auto; /* Only this section scrolls when roasts get too long */
     padding: 20px; 
-    border-bottom: 2px solid #222; 
-    scrollbar-width: thin;
-    scrollbar-color: #008f11 #0d0d0d;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: linear-gradient(180deg, #0d0d0d 0%, #151515 100%);
 }
 
+/* Scrollbar Styling (for that Hacker vibe) */
+#chat-box::-webkit-scrollbar {
+    width: 8px;
+}
+#chat-box::-webkit-scrollbar-track {
+    background: #0d0d0d;
+}
+#chat-box::-webkit-scrollbar-thumb {
+    background: #008f11;
+    border-radius: 4px;
+}
+
+/* 3. Message Styling */
 .msg { 
-    margin-bottom: 20px; 
     padding: 10px; 
     border-radius: 5px;
-    max-width: 80%;
-    line-height: 1.4;
+    max-width: 90%;
+    animation: fadeIn 0.3s ease-in;
 }
 
 .user { 
@@ -30,7 +50,7 @@ body {
     font-weight: bold; 
     text-transform: uppercase;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .clanka { 
@@ -38,41 +58,51 @@ body {
     font-weight: bold; 
     text-transform: uppercase;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
+/* 4. Fixed Input Area at Bottom */
 #input-area { 
-    padding: 25px; 
+    padding: 20px; 
     display: flex; 
-    gap: 15px; 
-    background: #151515;
+    gap: 10px; 
+    background: #000;
+    border-top: 2px solid #222;
 }
 
 input { 
     flex: 1; 
-    background: #000; 
+    background: #111; 
     border: 1px solid #00ff41; 
     color: #00ff41; 
-    padding: 15px; 
+    padding: 12px 15px; 
     outline: none;
+    font-size: 16px;
     font-family: inherit;
 }
 
 input:focus {
-    box-shadow: 0 0 10px #00ff41;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
 }
 
 button { 
     background: #00ff41; 
-    color: black; 
+    color: #000; 
     border: none; 
-    padding: 10px 30px; 
+    padding: 0 25px; 
     cursor: pointer; 
     font-weight: bold; 
-    transition: 0.2s;
+    text-transform: uppercase;
+    transition: all 0.2s;
 }
 
 button:hover {
-    background: #008f11;
-    color: white;
+    background: #ff3e3e;
+    color: #fff;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
