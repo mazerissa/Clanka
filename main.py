@@ -1,12 +1,18 @@
 import os
+from flask import Flask, request, jsonify, render_template
 from groq import Groq
 from dotenv import load_dotenv
 
-# Load your GROQ_API_KEY from .env
-load_dotenv()
+base_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(base_dir, ".env"))
+api_key = os.environ.get("GROQ_API_KEY")
+  
+if not api_key:
+    raise ValueError("GROQ_API_KEY not found! Check your .env file or export it.")
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+client = Groq(api_key=api_key)
 
+app = Flask(__name__)
 CLANKA_PERSONALITY = (
     "You are Clanka, "
     "the venom-spitting garbage mouth everyone's too scared to mute. In this group,"
@@ -28,26 +34,25 @@ CLANKA_PERSONALITY = (
     "Make it short ,not an essay, max 50 words"
 )
 
-def chat():
-    history = [{"role": "system", "content": CLANKA_PERSONALITY}]
-    
-    print("Clanka is online (Type 'exit' to leave)")
+@app.route('/')
+def home():
+    return render_template('index.html')
 
-    while True:
-        user_input = input("You: ")
-        if user_input.lower() in ["exit", "quit", "clear"]:
-            break
-        history.append({"role": "user", "content": user_input})
-        try:
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=history,
-            )
-            clanka_reply = completion.choices[0].message.content
-            print(f"Clanka: {clanka_reply}")
-            history.append({"role": "assistant", "content": clanka_reply})
-        except Exception as e:
-            print(f"Error: {e}")
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.json
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": CLANKA_PERSONALITY},
+                {"role": "user", "content": data.get('message')}
+            ],
+            temperature=1.2
+        )
+        return jsonify({"Clanka": completion.choices[0].message.content})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    chat()
+    app.run(debug=True, port=5000)
